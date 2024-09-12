@@ -58,10 +58,8 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=iotinducode
       - DOCKER_INFLUXDB_INIT_ORG=inducode
       - DOCKER_INFLUXDB_INIT_BUCKET=iotdata
-      - DOCKER_INFLUXDB_INIT_RETENTION=1w
-      #echo -n '{"sub":"inducodeadmin","name":"InduCode","admin":true}' | openssl base64 | tr -d '=' | tr '/+' '_-'
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=eyJzdWIiOiJpbmR1Y29kZWFkbWluIiwibmFtZSI6IkluZHVDb2RlIiwiYWRtaW4iOnRydWV9
-      # Letsencrypt config
+      - DOCKER_INFLUXDB_INIT_RETENTION=3d
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN="iot-indu-code"
       - VIRTUAL_HOST=influxdb.inducode.com.ar
       - LETSENCRYPT_HOST=influxdb.inducode.com.ar
       - LETSENCRYPT_EMAIL=carlos@sauay.com
