@@ -32,7 +32,7 @@ services:
       - LETSENCRYPT_EMAIL=carlos@sauay.com
   
   telegrafinput:
-    image: "telegraf:1.32"
+    image: "telegraf:1.22.4"
     container_name: 07-inducode-telegrafinput
     restart: always
     networks:
@@ -67,7 +67,6 @@ services:
   telegrafoutput:
     image: "telegraf:1.22.4"
     container_name: 07-inducode-telegrafoutput
-    #restart: always
     networks:
       - 00-infraestructura_dockers_net
     deploy:
