@@ -30,6 +30,7 @@ services:
       EMQX_DASHBOARD__DEFAULT_PASSWORD: iotinducode
       # Letsencrypt config
       VIRTUAL_HOST: mqtt.inducode.com.ar
+      VIRTUAL_PORT: 18083
       LETSENCRYPT_HOST: mqtt.inducode.com.ar
       LETSENCRYPT_EMAIL: carlos@sauay.com
   
