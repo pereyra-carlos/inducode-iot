@@ -1,22 +1,17 @@
 version: "3.9"
+
 services:
 
   mocksensor:
     build: mocksensor
-    container_name: 07-inducode-mocksensor
-    restart: always
-    networks:
-      - 00-infraestructura_dockers_net
     volumes:
       - ./data/mocksensor:/tmp/
-  
+    networks:
+      - 00-infraestructura_dockers_net
+
   emqx:
     user: root
     image: "emqx:4.4.3"
-    container_name: 07-inducode-emqx
-    restart: always
-    networks:
-      - 00-infraestructura_dockers_net
     ports:
       - "18083:18083" 
       - "18183:1883"
@@ -24,29 +19,28 @@ services:
       - ./data/emqx/data:/opt/emqx/data
       - ./data/emqx/log:/opt/emqx/log
     environment:
-      - EMQX_DASHBOARD__DEFAULT_USER__LOGIN=inducodeadmin
-      - EMQX_DASHBOARD__DEFAULT_USER__PASSWORD=iotinducode
-      - VIRTUAL_HOST=mqtt.inducode.com.ar
+      - EMQX_DASHBOARD__DEFAULT_USER__LOGIN=carlos
+      - EMQX_DASHBOARD__DEFAULT_USER__PASSWORD=Carlos239.
+      - VIRTUAL_HOST=iotlabs-mqtt.sauay.com
       - VIRTUAL_PORT=18083
-      - LETSENCRYPT_HOST=mqtt.inducode.com.ar
+      - LETSENCRYPT_HOST=iotlabs-mqtt.sauay.com
       - LETSENCRYPT_EMAIL=carlos@sauay.com
-  
-  telegrafinput:
-    image: "telegraf:1.32"
-    container_name: 07-inducode-telegrafinput
-    restart: always
     networks:
       - 00-infraestructura_dockers_net
+
+  #figura como Telegraf-Output
+  telegrafinput:
+    image: "telegraf:1.22.4"
     volumes:
       - ./data/telegrafinput/telegraf.conf:/etc/telegraf/telegraf.conf
       - ./data/mocksensor:/tmp/mocksensor
-  
-  influxdb:
-    image: "influxdb:2.2.0-alpine"
-    container_name: 07-inducode-influxdb
-    restart: always
     networks:
       - 00-infraestructura_dockers_net
+
+
+
+  influxdb:
+    image: "influxdb:2.2.0-alpine"
     ports: 
       - "8086:8086"
     volumes:
@@ -54,24 +48,21 @@ services:
       - ./data/influxdb/config:/etc/influxdb2
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=inducodeadmin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=iotinducode
-      - DOCKER_INFLUXDB_INIT_ORG=inducode
+      - DOCKER_INFLUXDB_INIT_USERNAME=carlos
+      - DOCKER_INFLUXDB_INIT_PASSWORD=Carlos239.
+      - DOCKER_INFLUXDB_INIT_ORG=sauay
       - DOCKER_INFLUXDB_INIT_BUCKET=iotdata
       - DOCKER_INFLUXDB_INIT_RETENTION=1w
-      #echo -n '{"sub":"inducodeadmin","name":"InduCode","admin":true}' | openssl base64 | tr -d '=' | tr '/+' '_-'
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=eyJzdWIiOiJpbmR1Y29kZWFkbWluIiwibmFtZSI6IkluZHVDb2RlIiwiYWRtaW4iOnRydWV9
-      # Letsencrypt config
-      - VIRTUAL_HOST=influxdb.inducode.com.ar
-      - LETSENCRYPT_HOST=influxdb.inducode.com.ar
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=carlos-iotdata-auth-token
+      - VIRTUAL_HOST=iotlabs-influxdb.sauay.com
+      - LETSENCRYPT_HOST=iotlabs-influxdb.sauay.com
       - LETSENCRYPT_EMAIL=carlos@sauay.com
-  
-  telegrafoutput:
-    image: "telegraf:1.22.4"
-    container_name: 07-inducode-telegrafoutput
-    #restart: always
     networks:
       - 00-infraestructura_dockers_net
+
+  #figura como telegraf consumer
+  telegrafoutput:
+    image: "telegraf:1.22.4"
     deploy:
       restart_policy:
         condition: on-failure
@@ -79,30 +70,52 @@ services:
         max_attempts: 20
     volumes:
       - ./data/telegrafoutput/telegraf.conf:/etc/telegraf/telegraf.conf
-  
+    networks:
+      - 00-infraestructura_dockers_net
+
   grafana:
     user: root
     image: "grafana/grafana:8.5.3"
-    container_name: 07-inducode-grafana
-    restart: always
-    networks:
-      - 00-infraestructura_dockers_net
     ports:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/admin_password
-      - VIRTUAL_HOST=dashboard.inducode.com.ar
-      - LETSENCRYPT_HOST=dashboard.inducode.com.ar
+      - VIRTUAL_HOST=iotlabs-grafana.sauay.com
+      - LETSENCRYPT_HOST=iotlabs-grafana.sauay.com
       - LETSENCRYPT_EMAIL=carlos@sauay.com
     volumes:
       - ./data/grafana:/var/lib/grafana
     secrets:
       - source: grafana_admin_password
         target: /run/secrets/admin_password
+    networks:
+      - 00-infraestructura_dockers_net
+
+
+
+
+#----------------------------------------------------------------------------------
+
+
+  telegrafdevices:
+    image: "telegraf:1.22.4"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 20
+    volumes:
+      - ./data/telegrafoutput/telegraf-topic-devices.conf:/etc/telegraf/telegraf.conf
+    networks:
+      - 00-infraestructura_dockers_net
+
+
+#----------------------------------------------------------------------------------
 
 secrets:
   grafana_admin_password:
     file: ./secrets/grafana_admin_password
+
 
 networks:
     00-infraestructura_dockers_net:
