@@ -106,7 +106,6 @@ secrets:
   grafana_admin_password:
     file: ./secrets/grafana_admin_password
 
-
 networks:
     00-infraestructura_dockers_net:
         external: true
