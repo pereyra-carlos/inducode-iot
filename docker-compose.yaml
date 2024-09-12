@@ -19,14 +19,14 @@ services:
       - 00-infraestructura_dockers_net
     ports:
       - "18083:18083"
-      - "1883:1883"
-      - "4369:4369"
+      - "8083:8083"
+      - "8084:8084"
+      - "8883:8883"
     volumes:
       - ./data/emqx/data:/opt/emqx/data
       - ./data/emqx/log:/opt/emqx/log
     environment:
-      EMQX_DASHBOARD__DEFAULT_USER__LOGIN: inducodeadmin
-      EMQX_DASHBOARD__DEFAULT_USER__PASSWORD: iotinducore
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: iotinducode
       # Letsencrypt config
       VIRTUAL_HOST: mqtt.inducode.com.ar
       LETSENCRYPT_HOST: mqtt.inducode.com.ar
